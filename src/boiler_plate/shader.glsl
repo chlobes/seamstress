@@ -9,10 +9,10 @@ out highp vec4 color;
 out highp float start_time;
 out highp vec2 blend;
 
-uniform vec3 cam_pos;
-
 void main() {
-	
+	color = v_color;
+	start_time = v_start_time;
+	blend = v_blend;
 	gl_Position = vec4(pos,1.0);
 }
 

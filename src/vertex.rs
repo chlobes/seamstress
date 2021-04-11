@@ -10,15 +10,29 @@ pub struct Vertex {
 }
 
 pub fn quadify(x: [Vertex; 4]) -> [Vertex; 6] {
-	[x[0],x[1],x[2],x[1],x[3],x[2]]
+	[x[0],x[1],x[3],x[0],x[3],x[2]]
 }
 
-pub fn quad(v: &mut Vec<Vertex>) {
-	v.extend_from_slice(&make_quad());
+pub fn quad(v: &mut Vec<Vertex>, pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4], blend: [Vec2<f32>; 4]) {
+	v.extend_from_slice(&make_quad(pos, z, size, color, blend));
 }
 
-pub fn make_quad() -> [Vertex; 6] {
-	let r = unimplemented!();
+pub fn make_quad(pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4], blend: [Vec2<f32>; 4]) -> [Vertex; 6] {
+	let offsets = [
+		vec2(0.0,0.0),
+		vec2(0.0,1.0),
+		vec2(1.0,0.0),
+		vec2(1.0,1.0),
+	];
+	let mut r = [Vertex::default(); 4];
+	for i in 0..4 {
+		r[i] = Vertex {
+			pos: (pos + size * offsets[i]).extend(z as f64 / 10000.0).f32(),
+			color: color[i],
+			start_time: uniforms().time as f32,
+			blend: blend[i],
+		};
+	}
 	quadify(r)
 }
 

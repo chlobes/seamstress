@@ -2,6 +2,7 @@
 mod prelude; use prelude::*;
 mod boiler_plate;
 mod vertex;
+mod game_state;
 
 #[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
@@ -9,15 +10,17 @@ pub fn main() -> Result<(), JsValue> {
 	setup_input_events();
 	let (gl, u_loc) = setup_rendering().expect(l!());
 	
+	let mut game_state = GameState::new();
+	
 	let f = None.rc(); let g = f.clone();
 	*f.borrow_mut() = Some(Closure::wrap(Box::new(move|| {
 		uniforms().add_time(1.0);
 		//run_callbacks();
+		game_state.tick();
 		for event in input_events().drain(..) {
-			
+			game_state.input_event(event);
 		}
-		let mut verts: Vec<Vertex> = Vec::new();
-		render(&gl, &u_loc, &verts);
+		render(&gl, &u_loc, &game_state.render());
 		request_animation_frame(g.borrow().as_ref().unwrap());
 	}) as Box<dyn FnMut()>));
 	request_animation_frame(f.borrow().as_ref().unwrap());

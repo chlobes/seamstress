@@ -55,7 +55,10 @@ pub fn setup_input_events() {
 		set_mouse_coords(vec2(e.client_x(), e.client_y()));
 	});
 	bind!(document(), "keydown", move|e: KeyboardEvent| {
-		input_events().push(InputEvent::Key(e.key()));
+		input_events().push(InputEvent::KeyDown(e.key()));
+	});
+	bind!(document(), "keyup", move|e: KeyboardEvent| {
+		input_events().push(InputEvent::KeyUp(e.key()));
 	});
 }
 
@@ -64,7 +67,8 @@ pub enum InputEvent {
 	Wheel(f64),
 	LeftClick,
 	RightClick,
-	Key(String),
+	KeyDown(String),
+	KeyUp(String),
 }
 
 use std::sync::atomic::{Ordering::Relaxed,AtomicU64};
@@ -93,14 +97,14 @@ pub fn set_mouse_coords(c: Vec2<i32>) {
 	let c = c.f64();
 	let rect = canvas().get_bounding_client_rect();
 	if c.x > rect.left() && rect.right() > c.x && c.y > rect.top() && rect.bottom() > c.y {
-		SCREEN_COORDS.0.store(c.x.to_bits(), Relaxed); SCREEN_COORDS.1.store(c.y.to_bits(), Relaxed);
 		let c = (c - vec2(rect.left(),rect.top())) / vec2(rect.width(),rect.height()) * 2.0 - 1.0;
 		let c = vec2(c.x,-c.y).f64();
+		SCREEN_COORDS.0.store(c.x.to_bits(), Relaxed); SCREEN_COORDS.1.store(c.y.to_bits(), Relaxed);
 	} else {
 		SCREEN_COORDS.0.store(f64::NAN.to_bits(), Relaxed); SCREEN_COORDS.1.store(f64::NAN.to_bits(), Relaxed);
 	}
 }
-pub fn mouse_screen_coords() -> Option<Vec2<f64>> {
+/*pub fn mouse_screen_coords() -> Option<Vec2<f64>> {
 	let c = vec2(f64::from_bits(SCREEN_COORDS.0.load(Relaxed)), f64::from_bits(SCREEN_COORDS.1.load(Relaxed)));
 	if c.is_nan().or() { None } else { Some(c) }
-}
+}*/

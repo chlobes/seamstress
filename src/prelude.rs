@@ -4,6 +4,7 @@ pub use std::rc::{Rc,Weak};
 pub use std::cell::{Cell,RefCell,Ref,RefMut};
 pub use crate::boiler_plate::*;
 pub use crate::vertex::*;
+pub use crate::game_state::*;
 
 pub use math_lib::{vec2::*,vec3::*};
 
