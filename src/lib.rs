@@ -11,6 +11,10 @@ pub fn main() -> Result<(), JsValue> {
 	let (gl, u_loc) = setup_rendering().expect(l!());
 	
 	let mut game_state = GameState::new();
+	game_state.platforms.push(Platform {
+		centre_pos: vec2(0.0,-0.8),
+		size: vec2(2.0,0.4),
+	});
 	
 	let f = None.rc(); let g = f.clone();
 	*f.borrow_mut() = Some(Closure::wrap(Box::new(move|| {
