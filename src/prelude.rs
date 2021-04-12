@@ -6,7 +6,7 @@ pub use crate::boiler_plate::*;
 pub use crate::vertex::*;
 pub use crate::game_state::*;
 
-pub use math_lib::{vec2::*,vec3::*};
+pub use math_lib::{vec2::*,vec3::*,traits::*};
 
 pub trait RcConv: Sized {
 	fn rc(self) -> Rc<RefCell<Self>> { Rc::new(RefCell::new(self)) }

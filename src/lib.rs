@@ -15,16 +15,38 @@ pub fn main() -> Result<(), JsValue> {
 		centre_pos: vec2(0.0,-0.8),
 		size: vec2(2.0,0.4),
 	});
+	game_state.platforms.push(Platform {
+		centre_pos: vec2(-1.0,0.0),
+		size: vec2(0.3,2.0),
+	});
+	game_state.platforms.push(Platform {
+		centre_pos: vec2(1.0,0.0),
+		size: vec2(0.3,2.0),
+	});
+	game_state.platforms.push(Platform {
+		centre_pos: vec2(-0.5,-0.2),
+		size: vec2(0.4,0.1),
+	});
+	game_state.platforms.push(Platform {
+		centre_pos: vec2(0.0,0.2),
+		size: vec2(0.4,0.1),
+	});
+	game_state.platforms.push(Platform {
+		centre_pos: vec2(0.5,0.6),
+		size: vec2(0.4,0.1),
+	});
 	
 	let f = None.rc(); let g = f.clone();
 	*f.borrow_mut() = Some(Closure::wrap(Box::new(move|| {
 		uniforms().add_time(1.0);
-		//run_callbacks();
-		game_state.tick();
-		for event in input_events().drain(..) {
-			game_state.input_event(event);
-		}
-		render(&gl, &u_loc, &game_state.render());
+		//if uniforms().time % 50.0 == 0.0 {
+			//run_callbacks();
+			game_state.tick();
+			for event in input_events().drain(..) {
+				game_state.input_event(event);
+			}
+			render(&gl, &u_loc, &game_state.render());
+		//}
 		request_animation_frame(g.borrow().as_ref().unwrap());
 	}) as Box<dyn FnMut()>));
 	request_animation_frame(f.borrow().as_ref().unwrap());

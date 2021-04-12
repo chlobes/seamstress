@@ -88,7 +88,7 @@ pub fn uniforms() -> UniformData { unsafe { UNIFORMS.as_ref().unwrap().borrow().
 pub fn set_uniforms(x: UniformData) { unsafe { *UNIFORMS.as_ref().unwrap().borrow_mut() = x; } }
 static mut OLD_UNIFORMS: Option<RefCell<UniformData>> = None;
 pub fn old_uniforms() -> RefMut<'static, UniformData> { unsafe { OLD_UNIFORMS.as_ref().unwrap().borrow_mut() } }
-pub fn time() -> f64 { uniforms().time }
+//pub fn time() -> f64 { uniforms().time }
 
 /*static ID: AtomicU64 = AtomicU64::new(0);
 pub fn new_id() -> u64 { ID.fetch_add(1, Relaxed) }*/
