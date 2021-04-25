@@ -25,6 +25,7 @@ features = [
 	'console',
 	'Blob',
 	'CanvasRenderingContext2d',
+	'Crypto',
 	'Document',
 	'DomRect',
 	'Element',

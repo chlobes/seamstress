@@ -5,19 +5,20 @@ use crate::prelude::*;
 pub struct Vertex {
 	pub pos: Vec3<f32>,
 	pub color: [f32; 4],
+	pub shine_color: [f32; 4],
 	pub start_time: f32,
-	pub blend: Vec2<f32>,
+	pub shine_rate: f32,
 }
 
 pub fn quadify(x: [Vertex; 4]) -> [Vertex; 6] {
 	[x[0],x[1],x[3],x[0],x[3],x[2]]
 }
 
-pub fn quad(v: &mut Vec<Vertex>, pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4], blend: [Vec2<f32>; 4]) {
-	v.extend_from_slice(&make_quad(pos, z, size, color, blend));
+pub fn quad(v: &mut Vec<Vertex>, pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4], shine_color: [[f32; 4]; 4], start_time: [f64; 4], shine_rate: f64) {
+	v.extend_from_slice(&make_quad(pos, z, size, color, shine_color, start_time, shine_rate));
 }
 
-pub fn make_quad(pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4], blend: [Vec2<f32>; 4]) -> [Vertex; 6] {
+pub fn make_quad(pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4], shine_color: [[f32; 4]; 4], start_time: [f64; 4], shine_rate: f64) -> [Vertex; 6] {
 	let offsets = [
 		vec2(0.0,0.0),
 		vec2(0.0,1.0),
@@ -29,8 +30,9 @@ pub fn make_quad(pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4]
 		r[i] = Vertex {
 			pos: (pos + size * offsets[i]).extend(z as f64 / 10000.0).f32(),
 			color: color[i],
-			start_time: uniforms().time as f32,
-			blend: blend[i],
+			shine_color: shine_color[i],
+			start_time: start_time[i] as f32,
+			shine_rate: shine_rate as f32,
 		};
 	}
 	quadify(r)

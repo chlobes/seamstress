@@ -39,14 +39,20 @@ pub fn main() -> Result<(), JsValue> {
 	let f = None.rc(); let g = f.clone();
 	*f.borrow_mut() = Some(Closure::wrap(Box::new(move|| {
 		uniforms().add_time(1.0);
-		//if uniforms().time % 50.0 == 0.0 {
-			//run_callbacks();
-			game_state.tick();
-			for event in input_events().drain(..) {
-				game_state.input_event(event);
+		//run_callbacks();
+		if time() % 100.0 < 0.1 {
+			if game_state.enemies.len() < 3 {
+				game_state.enemies.push(Enemy {
+					centre_pos: vec2(0.7,0.8),
+					.. Enemy::new()
+				})
 			}
-			render(&gl, &u_loc, &game_state.render());
-		//}
+		}
+		game_state.tick();
+		for event in input_events().drain(..) {
+			game_state.input_event(event);
+		}
+		render(&gl, &u_loc, &game_state.render());
 		request_animation_frame(g.borrow().as_ref().unwrap());
 	}) as Box<dyn FnMut()>));
 	request_animation_frame(f.borrow().as_ref().unwrap());

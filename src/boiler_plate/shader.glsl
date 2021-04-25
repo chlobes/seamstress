@@ -2,17 +2,20 @@
 
 in highp vec3 pos;
 in highp vec4 v_color;
+in highp vec4 v_shine_color;
 in highp float v_start_time;
-in highp vec2 v_blend;
+in highp float v_shine_rate;
 
 out highp vec4 color;
+out highp vec4 shine_color;
 out highp float start_time;
-out highp vec2 blend;
+out highp float shine_rate;
 
 void main() {
 	color = v_color;
+	shine_color = v_shine_color;
 	start_time = v_start_time;
-	blend = v_blend;
+	shine_rate = v_shine_rate;
 	gl_Position = vec4(pos,1.0);
 }
 
@@ -20,15 +23,17 @@ void main() {
 #version 300 es
 
 in highp vec4 color;
+in highp vec4 shine_color;
 in highp float start_time;
-in highp vec2 blend; //first value is how much of color variable to use, second variable is how much shine to use
+in highp float shine_rate;
 
 uniform highp float time;
 
 out mediump vec4 fragcolor;
 
 void main() {
-	highp float t = time - start_time;
-	highp float s = 20.0; //shine change rate
-	fragcolor = blend.x * color + blend.y * color.a * vec4(mod(t + 15.0, s) / s,mod(t + 10.0, s) / s,mod(t + 5.0, s) / s,0.0);
+	highp float shine = pow(abs(sin((time - start_time) * shine_rate)),5.0) * shine_color.a;
+	highp float alpha = color.a * (1.0 - shine); //if shine is strong, you can see less of underneath?
+	highp float a = alpha + shine;
+	fragcolor = vec4(color.rgb * alpha + shine_color.rgb * shine,a);
 }
