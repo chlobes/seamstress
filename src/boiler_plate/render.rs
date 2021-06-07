@@ -58,9 +58,9 @@ pub fn setup_rendering() -> Result<(Rc<GL>, Rc<Vec<Option<WebGlUniformLocation>>
 	
 	gl.vertex_attrib_pointer_with_i32(0, 3, GL::FLOAT, false, STRIDE, 0);
 	gl.vertex_attrib_pointer_with_i32(1, 4, GL::FLOAT, false, STRIDE, 12);
-	gl.vertex_attrib_pointer_with_i32(2, 4, GL::FLOAT, false, STRIDE, 28);
-	gl.vertex_attrib_pointer_with_i32(3, 1, GL::FLOAT, false, STRIDE, 44);
-	gl.vertex_attrib_pointer_with_i32(4, 1, GL::FLOAT, false, STRIDE, 48);
+	gl.vertex_attrib_pointer_with_i32(2, 4, GL::FLOAT, false, STRIDE, 12+16);
+	gl.vertex_attrib_pointer_with_i32(3, 3, GL::FLOAT, false, STRIDE, 12+16+16);
+	gl.vertex_attrib_pointer_with_i32(4, 1, GL::FLOAT, false, STRIDE, 12+16+16+12);
 	(0..5).for_each(|i| gl.enable_vertex_attrib_array(i));
 	
 	gl.viewport(0, 0, canvas().width() as i32, canvas().height() as i32);
@@ -72,7 +72,7 @@ pub fn setup_rendering() -> Result<(Rc<GL>, Rc<Vec<Option<WebGlUniformLocation>>
 	//gl.enable(GL::SAMPLE_COVERAGE);
 	//gl.enable(GL::SAMPLE_ALPHA_TO_COVERAGE);
 	
-	let loc = Rc::new(vec![gl.get_uniform_location(&program, "time")]);
+	let loc = Rc::new(vec![gl.get_uniform_location(&program, "time"), gl.get_uniform_location(&program, "cam_pos")]);
 	
 	Ok((gl, loc))
 }
@@ -82,6 +82,7 @@ pub fn render(gl: &GL, loc: &Rc<Vec<Option<WebGlUniformLocation>>>, verts: &[Ver
 	let (u, mut u2) = (uniforms(), old_uniforms());
 	if u != *u2 {
 		gl.uniform1f(loc[0].as_ref(), u.time as f32);
+		gl.uniform2f(loc[1].as_ref(), u.cam_pos.f32().x, u.cam_pos.f32().y);
 		*u2 = u;
 	}
 	
@@ -109,16 +110,19 @@ pub fn render(gl: &GL, loc: &Rc<Vec<Option<WebGlUniformLocation>>>, verts: &[Ver
 #[derive(Debug,Copy,Clone,PartialEq)]
 pub struct UniformData {
 	pub time: f64,
+	pub cam_pos: Vec2<f64>,
 }
 
 impl UniformData {
 	pub fn add_time(mut self, x: f64) -> Self { self.time += x; set_uniforms(self); self }
+	pub fn set_cam_pos(mut self, x: Vec2<f64>) -> Self { self.cam_pos = x; set_uniforms(self); self }
 }
 
 impl Default for UniformData {
 	fn default() -> Self {
 		Self {
 			time: 0.0,
+			cam_pos: Vec2::zero(),
 		}
 	}
 }

@@ -76,7 +76,7 @@ pub trait BoundingBox {
 	fn bottom_edge(&self) -> f64 { self.pos().y + self.size().y }
 	fn top_edge(&self) -> f64 { self.pos().y - self.size().y }
 	
-	fn collides(&self, other: &BoundingBox) -> bool {
+	fn collides(&self, other: &dyn BoundingBox) -> bool {
 		let right = self.left_edge() > other.right_edge();
 		let left = self.right_edge() < other.left_edge();
 		let up = self.bottom_edge() < other.top_edge();
@@ -136,6 +136,7 @@ pub struct Player {
 	pub movement: [bool; 4],
 	pub grounded: f64,
 	pub hp: f64,
+	pub trail: Vec<Trail>,
 }
 
 impl BoundingBox for Player {
@@ -157,10 +158,13 @@ impl Player {
 	pub fn grounded_limit(&self) -> f64 { 5.0 } //time since touching a platform that we're still allowed to jump
 	
 	pub fn render(&self, v: &mut Vec<Vertex>) {
-		quad(v, self.pos(), 10, self.size(), [[1.0,1.0,1.0,1.0]; 4], [[0.0; 4]; 4], [0.0; 4], 0.0);
+		quad(v, self.pos(), 10, self.size(), [[1.0,1.0,1.0,1.0]; 4], [[0.0; 4]; 4], [[0.0; 3]; 4], 0.0);
+		self.trail.iter().for_each(|x| x.render(v));
 	}
 	
 	pub fn do_movement(&mut self, platforms: &Vec<Platform>, enemies: &Vec<Enemy>) {
+		let old_pos = self.centre_pos;
+		uniforms().set_cam_pos(old_pos);
 		let mut damaged = false;
 		let movement_x = self.movement[0] as u8 as f64 - self.movement[1] as u8 as f64;
 		self.vel.x += movement_x * self.move_speed();
@@ -210,6 +214,10 @@ impl Player {
 		if damaged {
 			self.hp -= 1.0;
 		}
+		self.trail.insert(0, Trail::new(old_pos, self.centre_pos));
+		while self.trail[self.trail.len() - 1].time + 100.0 < time() {
+			self.trail.pop();
+		}
 	}
 }
 
@@ -227,7 +235,7 @@ impl BoundingBox for Platform {
 
 impl Platform {
 	pub fn render(&self, v: &mut Vec<Vertex>, player_hp_frac: f64) {
-		quad(v, self.pos(), 0, self.size(), [[(1.0 - player_hp_frac as f32) / 2.0,0.0,0.0,1.0]; 4], [[0.0; 4]; 4], [0.0; 4], 0.0);
+		quad(v, self.pos(), 0, self.size(), [[(1.0 - player_hp_frac as f32) / 2.0,0.0,0.0,1.0]; 4], [[0.0; 4]; 4], [[0.0; 3]; 4], 0.0);
 	}
 }
 
@@ -290,6 +298,51 @@ impl Enemy {
 		let shine_rate = 0.03 * (7.0 + 3.0 * RandGen::new((self.start_time * 100.0) as u64).skip(100).f64()) / 10.0;
 		let r = 0.2 / shine_rate;
 		let start_time = [t,t+r,t+r*2.0,t+r*3.0];
-		quad(v, self.pos(), 0, self.size(), [[1.0,0.0,1.0,1.0]; 4], [[1.0,1.0,0.5,0.5]; 4], start_time, shine_rate);
+		let mut x = [[0.0; 3]; 4];
+		for i in 0..4 {
+			for j in 0..3 {
+				x[i][j] = start_time[i];
+			}
+		}
+		let start_time = x;
+		quad(v, self.pos(), 0, self.size(), [[0.3,0.1,0.3,1.0]; 4], [[1.0,0.3,1.0,0.5]; 4], start_time, shine_rate);
+	}
+}
+
+#[derive(Debug,Default)]
+pub struct Trail {
+	pub from: Vec2<f64>,
+	pub to: Vec2<f64>,
+	pub time: f64,
+}
+
+impl Trail {
+	pub fn new(from: Vec2<f64>, to: Vec2<f64>) -> Self {
+		Self {
+			from,
+			to,
+			time: time(),
+		}
+	}
+	
+	pub fn width(&self) -> f64 { 0.01 }
+	pub fn extra_padding(&self) -> f64 { 0.01 }
+	
+	pub fn render(&self, v: &mut Vec<Vertex>) {
+		let dir = (self.to - self.from).normalize();
+		let l = vec2(-dir.y,dir.x);
+		let pos = [self.from + l * self.width(),self.from - l * self.width(),self.to + l * self.width(),self.to - l * self.width()];
+		let start_time = [vec3(0f64,0.2,0.4),vec3(0.05,0.25,0.45),vec3(0f64,0.2,0.4)+0.1,vec3(0.05,0.25,0.45)+0.1];
+		let mut r = [Vertex::default(); 4];
+		for i in 0..4 {
+			r[i] = Vertex {
+				pos: (pos[i] + dir * if i >= 2 { self.extra_padding() } else { -self.extra_padding() }).extend(1.0).f32(),
+				color: [0.7,0.7,0.7,1.0],
+				shine_color: [1.0,1.0,1.0,1.0],
+				start_time: (start_time[i] * 10.0 + self.time).f32().into_array(),
+				shine_rate: -0.1,
+			}
+		}
+		v.extend_from_slice(&quadify(r));
 	}
 }

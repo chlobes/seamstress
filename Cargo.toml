@@ -61,3 +61,6 @@ features = [
 
 [dependencies.math_lib]
 git = "https://github.com/pypypypypypypypypyp/math_lib"
+
+[dependencies.array_tuple]
+git = "https://github.com/pypypypypypypypypyp/array_tuple"

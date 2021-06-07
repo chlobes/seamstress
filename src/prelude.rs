@@ -7,6 +7,7 @@ pub use crate::vertex::*;
 pub use crate::game_state::*;
 
 pub use math_lib::{vec2::*,vec3::*,traits::*};
+pub use array_tuple::ArrayTuple;
 
 pub trait RcConv: Sized {
 	fn rc(self) -> Rc<RefCell<Self>> { Rc::new(RefCell::new(self)) }
