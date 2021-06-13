@@ -158,13 +158,12 @@ impl Player {
 	pub fn grounded_limit(&self) -> f64 { 5.0 } //time since touching a platform that we're still allowed to jump
 	
 	pub fn render(&self, v: &mut Vec<Vertex>) {
-		quad(v, self.pos(), 10, self.size(), [[1.0,1.0,1.0,1.0]; 4], [[0.0; 4]; 4], [[0.0; 3]; 4], 0.0);
+		quad(v, self.pos(), 100, self.size(), [[1.0,1.0,1.0,1.0]; 4], [[0.0; 4]; 4], [[0.0; 3]; 4], 0.0);
 		self.trail.iter().for_each(|x| x.render(v));
 	}
 	
 	pub fn do_movement(&mut self, platforms: &Vec<Platform>, enemies: &Vec<Enemy>) {
 		let old_pos = self.centre_pos;
-		uniforms().set_cam_pos(old_pos);
 		let mut damaged = false;
 		let movement_x = self.movement[0] as u8 as f64 - self.movement[1] as u8 as f64;
 		self.vel.x += movement_x * self.move_speed();
@@ -214,10 +213,15 @@ impl Player {
 		if damaged {
 			self.hp -= 1.0;
 		}
-		self.trail.insert(0, Trail::new(old_pos, self.centre_pos));
-		while self.trail[self.trail.len() - 1].time + 100.0 < time() {
+		if self.trail.is_empty() {
+			self.trail.push(Trail::new(old_pos, self.centre_pos, time(), time()-1.0));
+		}
+		self.trail.insert(0, Trail::new(self.trail[0].to, self.centre_pos, time(), self.trail[0].time));
+		while self.trail[self.trail.len() - 1].time + 300.0 < time() {
 			self.trail.pop();
 		}
+		let n = 10.0;
+		uniforms().set_cam_pos((uniforms().cam_pos * n + self.centre_pos) / (n+1.0));
 	}
 }
 
@@ -305,7 +309,7 @@ impl Enemy {
 			}
 		}
 		let start_time = x;
-		quad(v, self.pos(), 0, self.size(), [[0.3,0.1,0.3,1.0]; 4], [[1.0,0.3,1.0,0.5]; 4], start_time, shine_rate);
+		quad(v, self.pos(), 1, self.size(), [[0.3,0.1,0.3,1.0]; 4], [[1.0,0.3,1.0,0.5]; 4], start_time, shine_rate);
 	}
 }
 
@@ -314,33 +318,35 @@ pub struct Trail {
 	pub from: Vec2<f64>,
 	pub to: Vec2<f64>,
 	pub time: f64,
+	pub delta: f64,
 }
 
 impl Trail {
-	pub fn new(from: Vec2<f64>, to: Vec2<f64>) -> Self {
+	pub fn new(from: Vec2<f64>, to: Vec2<f64>, start_time: f64, last_time: f64) -> Self {
 		Self {
 			from,
 			to,
-			time: time(),
+			time: start_time,
+			delta: start_time - last_time,
 		}
 	}
 	
 	pub fn width(&self) -> f64 { 0.01 }
-	pub fn extra_padding(&self) -> f64 { 0.01 }
+	pub fn extra_padding(&self) -> f64 { 0.001 }
 	
 	pub fn render(&self, v: &mut Vec<Vertex>) {
 		let dir = (self.to - self.from).normalize();
 		let l = vec2(-dir.y,dir.x);
 		let pos = [self.from + l * self.width(),self.from - l * self.width(),self.to + l * self.width(),self.to - l * self.width()];
-		let start_time = [vec3(0f64,0.2,0.4),vec3(0.05,0.25,0.45),vec3(0f64,0.2,0.4)+0.1,vec3(0.05,0.25,0.45)+0.1];
+		let start_time = [vec3(0f64,0.25,0.5),vec3(0.05,0.3,0.55),vec3(0f64,0.25,0.55),vec3(0.05,0.3,0.55)];
 		let mut r = [Vertex::default(); 4];
 		for i in 0..4 {
 			r[i] = Vertex {
-				pos: (pos[i] + dir * if i >= 2 { self.extra_padding() } else { -self.extra_padding() }).extend(1.0).f32(),
+				pos: (pos[i] + dir * if i >= 2 { self.extra_padding() } else { -self.extra_padding() }).extend(get_z(10)).f32(),
 				color: [0.7,0.7,0.7,1.0],
-				shine_color: [1.0,1.0,1.0,1.0],
-				start_time: (start_time[i] * 10.0 + self.time).f32().into_array(),
-				shine_rate: -0.1,
+				shine_color: [1.0,1.0,1.0,0.7],
+				start_time: (start_time[i] * 10.0 + if i >= 2 { self.delta } else { 0.0 } - self.time).f32().into_array(),
+				shine_rate: 0.05,
 			}
 		}
 		v.extend_from_slice(&quadify(r));

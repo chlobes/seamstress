@@ -13,7 +13,7 @@ pub fn main() -> Result<(), JsValue> {
 	let mut game_state = GameState::new();
 	game_state.platforms.push(Platform {
 		centre_pos: vec2(0.0,-0.8),
-		size: vec2(2.0,0.4),
+		size: vec2(200.0,0.4),
 	});
 	game_state.platforms.push(Platform {
 		centre_pos: vec2(-1.0,0.0),

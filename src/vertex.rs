@@ -28,7 +28,7 @@ pub fn make_quad(pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4]
 	let mut r = [Vertex::default(); 4];
 	for i in 0..4 {
 		r[i] = Vertex {
-			pos: (pos + size * offsets[i]).extend(z as f64 / 10000.0).f32(),
+			pos: (pos + size * offsets[i]).extend(get_z(z)).f32(),
 			color: color[i],
 			shine_color: shine_color[i],
 			start_time: [start_time[i][0] as f32, start_time[i][1] as f32, start_time[i][2] as f32],
@@ -37,6 +37,8 @@ pub fn make_quad(pos: Vec2<f64>, z: usize, size: Vec2<f64>, color: [[f32; 4]; 4]
 	}
 	quadify(r)
 }
+
+pub fn get_z(z: usize) -> f64 { z as f64 / 1e4 }
 
 /*#[derive(Debug)]
 struct Builder {
