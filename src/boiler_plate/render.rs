@@ -61,7 +61,8 @@ pub fn setup_rendering() -> Result<(Rc<GL>, Rc<Vec<Option<WebGlUniformLocation>>
 	gl.vertex_attrib_pointer_with_i32(2, 4, GL::FLOAT, false, STRIDE, 12+16);
 	gl.vertex_attrib_pointer_with_i32(3, 3, GL::FLOAT, false, STRIDE, 12+16+16);
 	gl.vertex_attrib_pointer_with_i32(4, 1, GL::FLOAT, false, STRIDE, 12+16+16+12);
-	(0..5).for_each(|i| gl.enable_vertex_attrib_array(i));
+	gl.vertex_attrib_pointer_with_i32(5, 3, GL::FLOAT, false, STRIDE, 12+16+16+12+4);
+	(0..6).for_each(|i| gl.enable_vertex_attrib_array(i));
 	
 	gl.viewport(0, 0, canvas().width() as i32, canvas().height() as i32);
 	gl.clear_color(0.5, 0.5, 0.5, 1.0);

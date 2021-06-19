@@ -17,11 +17,11 @@ pub fn main() -> Result<(), JsValue> {
 	});
 	game_state.platforms.push(Platform {
 		centre_pos: vec2(-1.0,0.0),
-		size: vec2(0.3,2.0),
+		size: vec2(0.3,1.0),
 	});
 	game_state.platforms.push(Platform {
 		centre_pos: vec2(1.0,0.0),
-		size: vec2(0.3,2.0),
+		size: vec2(0.3,1.0),
 	});
 	game_state.platforms.push(Platform {
 		centre_pos: vec2(-0.5,-0.2),
@@ -38,7 +38,8 @@ pub fn main() -> Result<(), JsValue> {
 	
 	let f = None.rc(); let g = f.clone();
 	*f.borrow_mut() = Some(Closure::wrap(Box::new(move|| {
-		uniforms().add_time(1.0);
+		let delta = 1.0;
+		uniforms().add_time(delta);
 		//run_callbacks();
 		if time() % 100.0 < 0.1 {
 			if game_state.enemies.len() < 3 {
@@ -48,7 +49,7 @@ pub fn main() -> Result<(), JsValue> {
 				})
 			}
 		}
-		game_state.tick();
+		game_state.tick(delta);
 		for event in input_events().drain(..) {
 			game_state.input_event(event);
 		}

@@ -2,6 +2,7 @@ pub use web_sys::WebGl2RenderingContext as GL;
 pub use crate::vertex::*;
 pub use std::rc::{Rc,Weak};
 pub use std::cell::{Cell,RefCell,Ref,RefMut};
+pub use std::collections::{HashSet,HashMap};
 pub use crate::boiler_plate::*;
 pub use crate::vertex::*;
 pub use crate::game_state::*;
@@ -18,16 +19,24 @@ pub macro l() {
 	&concat!(file!(), " ", line!())
 }
 
-/*pub fn randf() -> f64 {
+pub fn binomial(n: usize) -> f64 {
+	let mut r = 0.0;
+	for _ in 0..n {
+		r += randf();
+	}
+	r / n as f64
+}
+
+pub fn randf() -> f64 {
 	randi() as f64 / u64::max_value() as f64
 }
 
 pub fn randi() -> u64 {
 	let mut x = [0; 8];
 	window().crypto().expect(l!()).get_random_values_with_u8_array(&mut x).expect(l!());
-	log!("{:?}",x);
+	//log!("random values: {:?}",x);
 	unsafe { std::mem::transmute(x) }
-}*/
+}
 
 #[derive(Debug,Copy,Clone)]
 pub struct RandGen { //seeded random generator

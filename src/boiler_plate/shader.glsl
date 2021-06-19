@@ -5,11 +5,13 @@ in highp vec4 v_color;
 in highp vec4 v_shine_color;
 in highp vec3 v_start_time;
 in highp float v_shine_rate;
+in highp vec3 v_shine_bias;
 
 out highp vec4 color;
 out highp vec4 shine_color;
 out highp vec3 start_time;
 out highp float shine_rate;
+out highp vec3 shine_bias;
 
 uniform highp vec2 cam_pos;
 
@@ -28,13 +30,14 @@ in highp vec4 color;
 in highp vec4 shine_color;
 in highp vec3 start_time;
 in highp float shine_rate;
+in highp vec3 shine_bias;
 
 uniform highp float time;
 
 out mediump vec4 fragcolor;
 
 void main() {
-	highp vec3 shine = abs(sin((time - start_time) * shine_rate));
+	highp vec3 shine = shine_bias + abs(sin((time - start_time) * shine_rate)) / (1.0 - shine_bias);
 	shine = vec3(pow(shine.x,5.0),pow(shine.y,5.0),pow(shine.z,5.0)) * shine_color.a;
 	highp float alpha = color.a * (1.0 - (shine.r+shine.g+shine.b)/3.0); //if shine is strong, you can see less of underneath?
 	highp vec3 a = alpha + shine;
